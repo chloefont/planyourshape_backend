@@ -11,3 +11,7 @@ services:
             MONGO_REPLICA_PORT: 27017
         ports:
             - "27017:27017"
+    redis:
+        image: redis:7.0.2-alpine
+        ports:
+            - "6379:6379"

@@ -2,43 +2,48 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { body, validationResult } from "express-validator";
+import register from "./register";
+import login from "./login";
+
+export const prisma = new PrismaClient();
 
 const app = express();
 const PORT: Number = 3000;
 
-app.use(bodyParser.json());
+main();
 
-// Handling GET / Request
-app.get("/", (req, res) => {
-  res.send("Welcome to typescript backend!");
-});
+async function main() {
+  prisma.$connect();
 
-app.post("/login", (req, res) => {
-  console.log(req.body.username);
-  res.status(200).send();
-});
+  app.use(bodyParser.json());
 
-app.post("/register", async (req, res) => {
-  await prisma.$connect();
-  const user = await prisma.user.create({
-    data: {
-      firstname: "Luca",
-      lastname: "Coduri",
-      username: "bafana",
-      email: "luca@gmail.com",
-      password: "banane",
-    },
+  // Handling GET / Request
+  app.get("/", (req, res) => {
+    res.send("Welcome to typescript backend!");
   });
 
-  prisma.$disconnect;
-  // res.json(user);
-  res.json(user);
-});
-
-// Server setup
-app.listen(PORT, () => {
-  console.log(
-    "The application is listening " + "on port http://localhost:" + PORT
+  app.post(
+    "/login",
+    body("username").isLength({ min: 4 }),
+    body("password").isLength({ min: 8 }),
+    login
   );
-});
+
+  app.post(
+    "/register",
+    body("password").isLength({ min: 8 }),
+    body("email").isEmail(),
+    body("firstname").isLength({ min: 2 }),
+    body("lastname").isLength({ min: 2 }),
+    body("username").isLength({ min: 4 }),
+    register
+  );
+
+  // Server setup
+  app.listen(PORT, () => {
+    console.log(
+      "The application is listening " + "on port http://localhost:" + PORT
+    );
+  });
+}
