@@ -5,7 +5,8 @@ import { PrismaClient } from "@prisma/client";
 import { body, validationResult } from "express-validator";
 import register from "./register";
 import login from "./login";
-
+import token_verify from "./middlewares/token_verify";
+require("dotenv").config();
 export const prisma = new PrismaClient();
 
 const app = express();
@@ -39,6 +40,10 @@ async function main() {
     body("username").isLength({ min: 4 }),
     register
   );
+
+  app.get("/test", token_verify, (req, res) => {
+    res.send("coucou");
+  });
 
   // Server setup
   app.listen(PORT, () => {
