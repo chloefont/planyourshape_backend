@@ -6,6 +6,7 @@ import { body, validationResult } from "express-validator";
 import register from "./register";
 import login from "./login";
 import token_verify from "./middlewares/token_verify";
+import logout from "./logout";
 import checkBodyArgsErrors from "./middlewares/body_args_errors";
 import { refreshToken } from "./token_utils";
 import conn from "./redis_connection";
@@ -57,6 +58,8 @@ async function main() {
     checkBodyArgsErrors,
     refreshToken
   );
+
+  app.post("/logout", token_verify, logout);
 
   // Server setup
   app.listen(PORT, () => {

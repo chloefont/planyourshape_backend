@@ -4,13 +4,23 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import redisDb from "./redis_connection";
 
-interface RefreshToken {
+export interface Token {
+  userId: string;
+  username: string;
+}
+
+export interface TokenDecoded extends Token {
+  iat: number;
+  exp: number;
+}
+
+export interface RefreshToken {
   userId: string;
   username: string;
   tokenId: string;
 }
 
-interface RefreshTokenDecoded extends RefreshToken {
+export interface RefreshTokenDecoded extends RefreshToken {
   iat: number;
   exp: number;
 }

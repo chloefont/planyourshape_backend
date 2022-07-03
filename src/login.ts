@@ -4,6 +4,7 @@ import { prisma } from "./server";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import { createToken, createRefreshtoken } from "./token_utils";
+import redisDb from "./redis_connection";
 
 interface LoginData {
   username: string;
@@ -36,6 +37,8 @@ export default async function login(req: Request, res: Response) {
       .json({ errors: "Password is not correct." });
     return;
   }
+
+  redisDb.deleteUserAllRefreshTokens(user.id);
 
   const token = createToken({
     userId: user.id,
