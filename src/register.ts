@@ -34,7 +34,9 @@ export default async function register(req: Request, res: Response) {
       },
     });
 
-    const token = jwt.sign({ username: data.username }, process.env.SECRET!);
+    const token = jwt.sign({ username: data.username }, process.env.SECRET!, {
+      expiresIn: "10s",
+    });
 
     res.status(200).json(token);
   } catch (e) {

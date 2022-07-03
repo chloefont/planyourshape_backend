@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { prisma } from "./server";
+import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 
 interface LoginData {
@@ -20,18 +21,24 @@ export default async function login(req: Request, res: Response) {
   )?.password;
 
   if (!hash) {
-    res.status(400).json({ errors: "User does not exist." });
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ errors: "User does not exist." });
     return;
   }
 
   const pwdCorrect = await bcrypt.compare(data.password, hash);
 
   if (!pwdCorrect) {
-    res.status(400).json({ errors: "Password is not correct." });
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ errors: "Password is not correct." });
     return;
   }
 
-  const token = jwt.sign({ username: data.username }, process.env.SECRET!);
+  const token = jwt.sign({ username: data.username }, process.env.SECRET!, {
+    expiresIn: "40s",
+  });
 
-  res.status(200).send(token);
+  res.status(StatusCodes.OK).send(token);
 }

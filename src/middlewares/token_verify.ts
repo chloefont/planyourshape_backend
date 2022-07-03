@@ -19,6 +19,7 @@ export default function tokenVerify(
     req.body.decodedToken = decoded;
   } catch (e) {
     res.status(400).json({ errors: "Given token is not correct" });
+    return;
   }
 
   next();
