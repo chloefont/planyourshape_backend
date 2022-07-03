@@ -8,6 +8,7 @@ import login from "./login";
 import token_verify from "./middlewares/token_verify";
 import checkBodyArgsErrors from "./middlewares/body_args_errors";
 import { refreshToken } from "./token_utils";
+import conn from "./redis_connection";
 
 require("dotenv").config();
 export const prisma = new PrismaClient();

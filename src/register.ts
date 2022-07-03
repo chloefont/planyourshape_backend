@@ -36,10 +36,7 @@ export default async function register(req: Request, res: Response) {
       username: data.username,
     });
 
-    const refreshToken = createRefreshtoken({
-      userId: user.id,
-      username: data.username,
-    });
+    const refreshToken = createRefreshtoken(user.id, data.username);
 
     res
       .status(StatusCodes.OK)
