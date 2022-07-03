@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { prisma } from "./server";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
+import { createToken, createRefreshtoken } from "./token_utils";
 
 interface LoginData {
   username: string;
@@ -12,13 +13,13 @@ interface LoginData {
 export default async function login(req: Request, res: Response) {
   const data = req.body as LoginData;
 
-  const hash = (
-    await prisma.user.findUnique({
-      where: {
-        username: data.username,
-      },
-    })
-  )?.password;
+  const user = await prisma.user.findUnique({
+    where: {
+      username: data.username,
+    },
+  });
+
+  const hash = user?.password;
 
   if (!hash) {
     res
@@ -36,9 +37,15 @@ export default async function login(req: Request, res: Response) {
     return;
   }
 
-  const token = jwt.sign({ username: data.username }, process.env.SECRET!, {
-    expiresIn: "40s",
+  const token = createToken({
+    userId: user.id,
+    username: data.username,
   });
 
-  res.status(StatusCodes.OK).send(token);
+  const refreshToken = createRefreshtoken({
+    userId: user.id,
+    username: data.username,
+  });
+
+  res.status(StatusCodes.OK).send({ token: token, refreshToken: refreshToken });
 }

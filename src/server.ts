@@ -6,6 +6,9 @@ import { body, validationResult } from "express-validator";
 import register from "./register";
 import login from "./login";
 import token_verify from "./middlewares/token_verify";
+import checkBodyArgsErrors from "./middlewares/body_args_errors";
+import { refreshToken } from "./token_utils";
+
 require("dotenv").config();
 export const prisma = new PrismaClient();
 
@@ -28,6 +31,7 @@ async function main() {
     "/login",
     body("username").isLength({ min: 4 }),
     body("password").isLength({ min: 8 }),
+    checkBodyArgsErrors,
     login
   );
 
@@ -38,12 +42,20 @@ async function main() {
     body("firstname").isLength({ min: 2 }),
     body("lastname").isLength({ min: 2 }),
     body("username").isLength({ min: 4 }),
+    checkBodyArgsErrors,
     register
   );
 
   app.get("/test", token_verify, (req, res) => {
     res.send("coucou");
   });
+
+  app.post(
+    "/refresh_token",
+    body("refreshToken").isString(),
+    checkBodyArgsErrors,
+    refreshToken
+  );
 
   // Server setup
   app.listen(PORT, () => {

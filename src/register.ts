@@ -1,8 +1,10 @@
 import { Response, Request } from "express";
 import { validationResult } from "express-validator";
 import { prisma } from "./server";
+import { StatusCodes } from "http-status-codes";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { createToken, createRefreshtoken } from "./token_utils";
 
 const saltRounds = 10;
 
@@ -15,11 +17,6 @@ interface RegisterData {
 }
 
 export default async function register(req: Request, res: Response) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
   const data = req.body as RegisterData;
   try {
     const hash = await bcrypt.hash(data.password, saltRounds);
@@ -34,14 +31,22 @@ export default async function register(req: Request, res: Response) {
       },
     });
 
-    const token = jwt.sign({ username: data.username }, process.env.SECRET!, {
-      expiresIn: "10s",
+    const token = createToken({
+      userId: user.id,
+      username: data.username,
     });
 
-    res.status(200).json(token);
+    const refreshToken = createRefreshtoken({
+      userId: user.id,
+      username: data.username,
+    });
+
+    res
+      .status(StatusCodes.OK)
+      .json({ token: token, refreshToken: refreshToken });
   } catch (e) {
     return res
-      .status(400)
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ errors: "Error when inserting new user : " + e });
   }
 }
