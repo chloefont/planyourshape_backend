@@ -2,6 +2,7 @@ import { Response, Request } from "express";
 import { validationResult } from "express-validator";
 import { prisma } from "./server";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const saltRounds = 10;
 
@@ -33,7 +34,9 @@ export default async function register(req: Request, res: Response) {
       },
     });
 
-    res.status(200).json(user);
+    const token = jwt.sign({ username: data.username }, process.env.SECRET!);
+
+    res.status(200).json(token);
   } catch (e) {
     return res
       .status(400)

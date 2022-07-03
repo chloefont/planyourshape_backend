@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { prisma } from "./server";
+import jwt from "jsonwebtoken";
 
 interface LoginData {
   username: string;
@@ -30,5 +31,7 @@ export default async function login(req: Request, res: Response) {
     return;
   }
 
-  res.status(200).send();
+  const token = jwt.sign({ username: data.username }, process.env.SECRET!);
+
+  res.status(200).send(token);
 }
